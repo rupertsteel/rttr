@@ -62,7 +62,8 @@ else()
   set(RTTR_LIB_INSTALL_DIR "lib")
 endif()
 
-set(CMAKE_DEBUG_POSTFIX "_d")
+# remove the debug postfix because it makes it harder to include the library in my build system
+# set(CMAKE_DEBUG_POSTFIX "_d")
 
 # detect architecture
 if (CMAKE_SIZEOF_VOID_P EQUAL 8)
