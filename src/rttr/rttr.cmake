@@ -125,6 +125,7 @@ set(HEADER_FILES access_levels.h
                  detail/property/property_wrapper_object.h
                  detail/registration/bind_types.h
                  detail/registration/bind_impl.h
+                 detail/registration/register_base_class_from_accessor.h
                  detail/registration/registration_impl.h
                  detail/registration/registration_executer.h
                  detail/type/accessor_type.h
@@ -148,7 +149,7 @@ set(HEADER_FILES access_levels.h
                  detail/variant_array_view/variant_array_view_creator.h
                  detail/variant_array_view/variant_array_view_creator_impl.h
                  detail/variant_array_view/variant_array_view_traits.h
-                 detail/variant_associative_view/variant_associative_view_p.h
+                 detail/variant_associative_view/variant_associative_view_private.h
                  detail/variant_associative_view/variant_associative_view_creator.h
                  detail/variant_associative_view/variant_associative_view_creator_impl.h
                 )
