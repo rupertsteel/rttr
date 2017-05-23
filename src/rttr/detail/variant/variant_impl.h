@@ -189,10 +189,24 @@ RTTR_INLINE variant::try_pointer_conversion(T& to, const type& source_type, cons
     if (!source_type.is_pointer())
         return false;
 
-    if (void * ptr = type::apply_offset(get_raw_ptr(), source_type, target_type))
+    auto ptr = get_raw_ptr();
+
+    if (ptr)
     {
-        to = reinterpret_cast<T>(ptr);
-        return true;
+        if (ptr = type::apply_offset(ptr, source_type, target_type))
+        {
+            to = reinterpret_cast<T>(ptr);
+            return true;
+        }
+    }
+    else // a nullptr
+    {
+        // check if a down cast is possible
+        if (source_type.is_derived_from(target_type))
+        {
+            to = reinterpret_cast<T>(ptr);
+            return true;
+        }
     }
 
     return false;
@@ -307,13 +321,26 @@ RTTR_INLINE detail::enable_if_t<!std::is_arithmetic<T>::value && !std::is_enum<T
 template<typename T>
 RTTR_INLINE detail::enable_if_t<std::is_enum<T>::value, T> variant::convert_impl(bool* ok) const
 {
-    variant var = type::get<T>();
-    auto wrapper = std::ref(var);
-    const bool could_convert = convert<std::reference_wrapper<variant>>(wrapper);
-    if (ok)
-        *ok = could_convert;
+    const auto target_type = type::get<T>();
+    if (get_type() == target_type)
+    {
+        T result;
+        const auto could_convert = convert<T>(result);
+        if (ok)
+            *ok = could_convert;
 
-    return var.get_value<T>();
+        return result;
+    }
+    else
+    {
+        variant var = type::get<T>();
+        auto wrapper = std::ref(var);
+        const auto could_convert = convert<std::reference_wrapper<variant>>(wrapper);
+        if (ok)
+            *ok = could_convert;
+
+        return var.get_value<T>();
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

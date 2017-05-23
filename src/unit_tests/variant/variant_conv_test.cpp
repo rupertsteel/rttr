@@ -92,12 +92,24 @@ struct other_derived : virtual base
     RTTR_ENABLE(base)
 };
 
+enum class test_enum
+{
+    first = 1,
+    second = 2
+};
+
 } // end anonymous namespace
 
 RTTR_REGISTRATION
 {
     type::register_converter_func(convert_to_string);
     type::register_converter_func(convert_to_vector);
+
+    registration::enumeration<test_enum>("test_enum")
+        (
+            value("first", test_enum::first),
+            value("second", test_enum::second)
+    );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -589,6 +601,12 @@ TEST_CASE("variant test - convert internal", "[variant]")
     CHECK(var.is_type<derived*>() == true);
     CHECK(var.get_value<derived*>() == d);
     CHECK(var.convert<base*>() == b);
+
+    derived* d2 = nullptr;
+    var = d2;
+    could_convert = false;
+    CHECK(var.convert<base*>(&could_convert) == nullptr);
+    CHECK(could_convert == true);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -668,6 +686,20 @@ TEST_CASE("variant test - convert from wrapped value", "[variant]")
 
         CHECK(var.convert(type::get<int>()) == false);
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("variant test - convert from enum", "[variant]")
+{
+    auto ok = false;
+    rttr::variant var = type::get<test_enum>().get_enumeration().name_to_value("second");
+    test_enum converted = var.convert<test_enum>(&ok);
+
+    CHECK(ok == true);
+    CHECK(converted != test_enum::first);
+    CHECK(converted == test_enum::second);
+    CHECK(static_cast<int>(converted) == 2);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
